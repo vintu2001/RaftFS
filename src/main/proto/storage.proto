@@ -1,0 +1,118 @@
+syntax = "proto3";
+
+package com.raftfs.proto;
+
+option java_package = "com.raftfs.proto";
+option java_multiple_files = true;
+
+service ObjectStorageService {
+    rpc PutObject(PutObjectRequest) returns (PutObjectResponse);
+    rpc GetObject(GetObjectRequest) returns (GetObjectResponse);
+    rpc DeleteObject(DeleteObjectRequest) returns (DeleteObjectResponse);
+    rpc WriteChunk(WriteChunkRequest) returns (WriteChunkResponse);
+    rpc ReadChunk(ReadChunkRequest) returns (ReadChunkResponse);
+    rpc DeleteChunk(DeleteChunkRequest) returns (DeleteChunkResponse);
+}
+
+service RaftService {
+    rpc AppendEntries(AppendEntriesRequest) returns (AppendEntriesResponse);
+    rpc RequestVote(RequestVoteRequest) returns (RequestVoteResponse);
+    rpc InstallSnapshot(InstallSnapshotRequest) returns (InstallSnapshotResponse);
+}
+
+message PutObjectRequest {
+    string key = 1;
+    bytes data = 2;
+}
+
+message PutObjectResponse {
+    bool success = 1;
+    string message = 2;
+}
+
+message GetObjectRequest {
+    string key = 1;
+}
+
+message GetObjectResponse {
+    bool found = 1;
+    bytes data = 2;
+}
+
+message DeleteObjectRequest {
+    string key = 1;
+}
+
+message DeleteObjectResponse {
+    bool success = 1;
+}
+
+message WriteChunkRequest {
+    string key = 1;
+    bytes data = 2;
+}
+
+message WriteChunkResponse {
+    bool success = 1;
+}
+
+message ReadChunkRequest {
+    string key = 1;
+}
+
+message ReadChunkResponse {
+    bool found = 1;
+    bytes data = 2;
+}
+
+message DeleteChunkRequest {
+    string key = 1;
+}
+
+message DeleteChunkResponse {
+    bool success = 1;
+}
+
+message AppendEntriesRequest {
+    int64 term = 1;
+    string leader_id = 2;
+    int64 prev_log_index = 3;
+    int64 prev_log_term = 4;
+    repeated LogEntryProto entries = 5;
+    int64 leader_commit = 6;
+}
+
+message AppendEntriesResponse {
+    int64 term = 1;
+    bool success = 2;
+}
+
+message RequestVoteRequest {
+    int64 term = 1;
+    string candidate_id = 2;
+    int64 last_log_index = 3;
+    int64 last_log_term = 4;
+}
+
+message RequestVoteResponse {
+    int64 term = 1;
+    bool vote_granted = 2;
+}
+
+message InstallSnapshotRequest {
+    int64 term = 1;
+    string leader_id = 2;
+    int64 last_included_index = 3;
+    int64 last_included_term = 4;
+    bytes data = 5;
+}
+
+message InstallSnapshotResponse {
+    int64 term = 1;
+}
+
+message LogEntryProto {
+    int64 term = 1;
+    int64 index = 2;
+    bytes command = 3;
+}
