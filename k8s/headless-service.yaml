@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: storage-headless
+  labels:
+    app: raftfs
+spec:
+  clusterIP: None
+  selector:
+    app: storage-node
+  ports:
+  - port: 8080
+    name: grpc
+  - port: 8081
+    name: raft

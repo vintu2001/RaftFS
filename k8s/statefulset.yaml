@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: storage-node
+  labels:
+    app: raftfs
+spec:
+  serviceName: "storage-headless"
+  replicas: 3
+  selector:
+    matchLabels:
+      app: storage-node
+  template:
+    metadata:
+      labels:
+        app: storage-node
+    spec:
+      serviceAccountName: raftfs-gcs-sa
+      containers:
+      - name: storage-node
+        image: gcr.io/PROJECT_ID/raftfs-storage-node:latest
+        ports:
+        - containerPort: 8080
+          name: grpc
+        - containerPort: 8081
+          name: raft
+        env:
+        - name: NODE_ID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: PEERS
+          value: "storage-node-0.storage-headless:8081,storage-node-1.storage-headless:8081,storage-node-2.storage-headless:8081"
+        - name: LOCAL_ADDRESS
+          value: "$(NODE_ID).storage-headless:8080"
+        - name: GCS_BUCKET
+          value: "raftfs-chunks-$(NODE_ID)"
+        - name: GCS_PROJECT_ID
+          valueFrom:
+            configMapKeyRef:
+              name: raftfs-config
+              key: gcs-project-id
+        - name: DATA_DIR
+          value: "/data"
+        - name: GRPC_PORT
+          value: "8080"
+        - name: RAFT_PORT
+          value: "8081"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        livenessProbe:
+          grpc:
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 10
+        readinessProbe:
+          grpc:
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      storageClassName: standard
+      resources:
+        requests:
+          storage: 10Gi
