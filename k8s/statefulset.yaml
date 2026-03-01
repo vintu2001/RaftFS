@@ -31,6 +31,8 @@ spec:
               fieldPath: metadata.name
         - name: PEERS
           value: "storage-node-0.storage-headless:8081,storage-node-1.storage-headless:8081,storage-node-2.storage-headless:8081"
+        - name: STORAGE_PEERS
+          value: "storage-node-0.storage-headless:8080,storage-node-1.storage-headless:8080,storage-node-2.storage-headless:8080"
         - name: LOCAL_ADDRESS
           value: "$(NODE_ID).storage-headless:8080"
         - name: GCS_BUCKET

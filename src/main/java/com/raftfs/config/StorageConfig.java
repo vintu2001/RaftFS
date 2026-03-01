@@ -26,8 +26,8 @@ public class StorageConfig {
     @Value("${storage.local-address}")
     private String localAddress;
 
-    @Value("${raft.peers}")
-    private String peersString;
+    @Value("${storage.peers}")
+    private String storagePeers;
 
     @Bean
     public ChunkStore chunkStore() {
@@ -40,14 +40,14 @@ public class StorageConfig {
     @Bean
     public ConsistentHashRing consistentHashRing() {
         ConsistentHashRing ring = new ConsistentHashRing();
-        Arrays.stream(peersString.split(","))
+        Arrays.stream(storagePeers.split(","))
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
                 .forEach(ring::addNode);
         return ring;
     }
 
-    @Bean
+    @Bean(destroyMethod = "shutdown")
     public ReplicationManager replicationManager(ConsistentHashRing ring, ChunkStore chunkStore) {
         return new ReplicationManager(ring, chunkStore, localAddress);
     }

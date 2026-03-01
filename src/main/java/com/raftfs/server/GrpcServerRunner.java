@@ -3,6 +3,7 @@ package com.raftfs.server;
 import com.raftfs.raft.RaftRpcService;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
+import io.grpc.protobuf.services.ProtoReflectionService;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.slf4j.Logger;
@@ -36,6 +37,7 @@ public class GrpcServerRunner {
     public void start() throws Exception {
         grpcServer = ServerBuilder.forPort(grpcPort)
                 .addService(storageService)
+                .addService(ProtoReflectionService.newInstance())
                 .build()
                 .start();
         log.info("gRPC storage server started on port {}", grpcPort);
